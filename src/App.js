@@ -64,26 +64,33 @@ export default class SimpleInlineToolbarEditor extends Component {
 
   state = {
     editorState: createEditorStateWithText(text),
+    selectedText: "Hello Gorilla"
   };
 
   onChange = (editorState) => {
+
     this.setState({
       editorState,
     });
+    var selectionState = editorState.getSelection();
+    var anchorKey = selectionState.getAnchorKey();
+    var currentContent = editorState.getCurrentContent();
+    var currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    var start = selectionState.getStartOffset();
+    var end = selectionState.getEndOffset();
+    var selectedText = currentContentBlock.getText().slice(start, end);
+    console.log(selectedText);
+    this.state.selectedText = selectedText;
+    this.setState({
+      selectedText: selectedText
+    });
   };
 
-  focus = () => {
-    console.log("Focus");
+  focus = (e) => {
+    console.log("Focus Editor");
+    e.stopPropagation();
     this.editor.focus();
   };
-
-  onMouseOverEditor = () => {
-    console.log("Mouse over editor");
-  }
-
-  onMouseOverToolbar = () => {
-    console.log("Mouse over toolbar");
-  }
 
   clickOnToolbar = () => {
     console.log("Click on Toolbar");
@@ -91,18 +98,39 @@ export default class SimpleInlineToolbarEditor extends Component {
   clickOnEditor  = () => {
     console.log("Click on Editor");
   }
+  focusTextArea = (e) => {
+    console.log("Focus Textarea");
+    e.stopPropagation();
+  }
+  fetchSelectedText = (e) => {
+    var editorState = this.editor.getEditorState();
+    var selectionState = editorState.getSelection();
+    var anchorKey = selectionState.getAnchorKey();
+    var currentContent = editorState.getCurrentContent();
+    var currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    var start = selectionState.getStartOffset();
+    var end = selectionState.getEndOffset();
+    var selectedText = currentContentBlock.getText().slice(start, end);
+    console.log(selectedText);
+    this.state.selectedText = selectedText;
+    this.setState({
+      selectedText: selectedText
+    });
+    //console.log(this.editor.editorState.getSelection());
+  }
   render() {
     return (
         <div className="editor" onClick={this.focus}>
           <Editor
             editorState={this.state.editorState}
             onChange={this.onChange}
-            onClick={this.clickOnEditor}
-            onMouseOver={this.onMouseOverEditor}
             plugins={plugins}
             ref={(element) => { this.editor = element; }}
           />
           <InlineToolbar onMouseOver={this.onMouseOverToolbar} onClick={this.clickOnToolbar} />
+          <input type="text" onClick={this.focusTextArea} value={this.state.selectedText}/>
+          <button onClick={this.fetchSelectedText}>Fetch</button>
+          <button onClick={this.correctText}>Correct</button>
         </div>
     );
   }
