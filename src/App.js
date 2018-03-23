@@ -102,6 +102,9 @@ export default class SimpleInlineToolbarEditor extends Component {
     console.log("Focus Textarea");
     e.stopPropagation();
   }
+  handleTextCorrectionChange = (e) => {
+    this.setState({selectedText:e.target.value});
+  }
   fetchSelectedText = (e) => {
     var editorState = this.editor.getEditorState();
     var selectionState = editorState.getSelection();
@@ -128,7 +131,7 @@ export default class SimpleInlineToolbarEditor extends Component {
             ref={(element) => { this.editor = element; }}
           />
           <InlineToolbar onMouseOver={this.onMouseOverToolbar} onClick={this.clickOnToolbar} />
-          <input type="text" onClick={this.focusTextArea} value={this.state.selectedText}/>
+          <input type="text" onClick={this.focusTextArea} value={this.state.selectedText} onChange={this.handleTextCorrectionChange}/>
           <button onClick={this.fetchSelectedText}>Fetch</button>
           <button onClick={this.correctText}>Correct</button>
         </div>
