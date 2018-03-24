@@ -144,7 +144,7 @@ export default class SimpleInlineToolbarEditor extends Component {
   correctText = (e) => {
     //const { start, end } = getInsertRange(autocompleteState, editorState);
     //const { start, end } = {0,1};
-    const start = 0; const end = 1;
+    const start = 0; const end = 5;
     var editorState = this.editor.getEditorState();
     const currentSelectionState = editorState.getSelection();
     
@@ -154,7 +154,8 @@ export default class SimpleInlineToolbarEditor extends Component {
     });
     
     const contentState = editorState.getCurrentContent();
-    let hashtag = e.target.value; 
+    //let hashtag = e.target.value; 
+    let hashtag = "Hello";
     const contentStateWithEntity = contentState.createEntity(
       'HASHTAG',
       'IMMUTABLE',
@@ -164,7 +165,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     );
     
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-      
+    console.log(entityKey);
     let newContentState = Modifier.replaceText(
       contentStateWithEntity,
       selection,
@@ -178,11 +179,11 @@ export default class SimpleInlineToolbarEditor extends Component {
       newContentState,
       `insert-hashtag`,
     );
-    
-    /*return EditorState.forceSelection(
+    console.log("new text added");
+    return EditorState.forceSelection(
       newEditorState,
       newContentState.getSelectionAfter(),
-    );*/
+    );
   }
   render() {
     return (
