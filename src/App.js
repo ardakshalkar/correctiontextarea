@@ -3,8 +3,13 @@ import Editor, { createEditorStateWithText } from 'draft-js-plugins-editor';
 import createInlineToolbarPlugin from 'draft-js-inline-toolbar-plugin';
 import editorStyles from './editorStyles.css';
 import './editorStyles.css';
+import { Modifier,EditorState } from 'draft-js';
 
-
+const styleMap = {
+  'STRIKETROUGH':{
+    textDecoration:'line-through',
+  }
+}
 
 class CorrectTextFieldPicker extends Component {
   componentDidMount() {
@@ -121,10 +126,69 @@ export default class SimpleInlineToolbarEditor extends Component {
     });
     //console.log(this.editor.editorState.getSelection());
   }
+
+  getInsertRange = (autocompleteState, editorState) => {
+    const currentSelectionState = editorState.getSelection();
+    const end = currentSelectionState.getAnchorOffset();
+    const anchorKey = currentSelectionState.getAnchorKey();
+    const currentContent = editorState.getCurrentContent();
+    const currentBlock = currentContent.getBlockForKey(anchorKey);
+    const blockText = currentBlock.getText();
+    const start = blockText.substring(0, end).lastIndexOf('#');
+
+    return {
+      start,
+      end,
+    };
+  };
+  correctText = (e) => {
+    //const { start, end } = getInsertRange(autocompleteState, editorState);
+    //const { start, end } = {0,1};
+    const start = 0; const end = 1;
+    var editorState = this.editor.getEditorState();
+    const currentSelectionState = editorState.getSelection();
+    
+    const selection = currentSelectionState.merge({
+      anchorOffset: start,
+      focusOffset: end,
+    });
+    
+    const contentState = editorState.getCurrentContent();
+    let hashtag = e.target.value; 
+    const contentStateWithEntity = contentState.createEntity(
+      'HASHTAG',
+      'IMMUTABLE',
+      {
+        hashtag,
+      },
+    );
+    
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+      
+    let newContentState = Modifier.replaceText(
+      contentStateWithEntity,
+      selection,
+      `#${hashtag}`,
+      null,
+      entityKey,
+    );
+    
+    const newEditorState = EditorState.push(
+      editorState,
+      newContentState,
+      `insert-hashtag`,
+    );
+    
+    /*return EditorState.forceSelection(
+      newEditorState,
+      newContentState.getSelectionAfter(),
+    );*/
+  }
   render() {
     return (
         <div className="editor" onClick={this.focus}>
           <Editor
+            customStyleMap={styleMap}
             editorState={this.state.editorState}
             onChange={this.onChange}
             plugins={plugins}
