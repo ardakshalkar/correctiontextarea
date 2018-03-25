@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Editor, { createEditorStateWithText } from 'draft-js-plugins-editor';
-import createInlineToolbarPlugin from 'draft-js-inline-toolbar-plugin';
 import editorStyles from './editorStyles.css';
 import './editorStyles.css';
 import { Modifier,EditorState } from 'draft-js';
@@ -34,7 +33,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     var end = selectionState.getEndOffset();
     var selectedText = currentContentBlock.getText().slice(start, end);
     //console.log(selectedText);
-    this.state.selectedText = selectedText;
+    //this.state.selectedText = selectedText;
     this.setState({
       selectedText: selectedText
     });
@@ -51,12 +50,12 @@ export default class SimpleInlineToolbarEditor extends Component {
     const text = this.state.selectedText;
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection();
-    const contentStateWithEntity = contentState.createEntity(
+    /*const contentStateWithEntity = contentState.createEntity(
       'LINK',
       'MUTABLE',
       { status: 'complete' }
-    );
-    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    );*/
+    //const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
     const newContentState = Modifier.replaceText(editorState.getCurrentContent(),selectionState,text);
     const newEditorState = EditorState.set(editorState, { currentContent: newContentState });
     this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
