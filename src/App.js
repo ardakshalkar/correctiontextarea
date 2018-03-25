@@ -89,6 +89,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     this.setState({
       selectedText: selectedText
     });
+    console.log(currentContentBlock.key);
   };
 
   focus = (e) => {
@@ -124,6 +125,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     this.setState({
       selectedText: selectedText
     });
+    console.log(currentContentBlock);
     //console.log(this.editor.editorState.getSelection());
   }
 
@@ -142,9 +144,35 @@ export default class SimpleInlineToolbarEditor extends Component {
     };
   };
   correctText = (e) => {
+    console.log("Correct text function");
+    var editorState = this.editor.getEditorState();
+    let contentState = editorState.getCurrentContent();
+    var selectionState = editorState.getSelection();
+    console.log(selectionState);
+    contentState = Modifier.replaceText(editorState.getCurrentContent(),selectionState,"HELLO");
+    const newEditorState = EditorState.push(
+      editorState,contentState,
+    )
+    this.onChange(newEditorState);
+    /*let targetValue = e.target.value;
+    var editorState = this.editor.getEditorState();
+    var selectionState = editorState.getSelection();
+    var anchorKey = selectionState.getAnchorKey();
+    var currentContent = editorState.getCurrentContent();
+    var currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    console.log("--------");
+    console.log(currentContentBlock.key);
+
+    let contentState = editorState.getCurrentContent();
+    contentState = Modifier.replaceText(contentState,selectionState,"HELLO");
+    this.setState({
+      editorState: EditorState.push(editorState,contentState)
+    });*/
     //const { start, end } = getInsertRange(autocompleteState, editorState);
     //const { start, end } = {0,1};
-    const start = 0; const end = 5;
+
+
+/*     const start = 0; const end = 5;
     var editorState = this.editor.getEditorState();
     const currentSelectionState = editorState.getSelection();
     
@@ -183,7 +211,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     return EditorState.forceSelection(
       newEditorState,
       newContentState.getSelectionAfter(),
-    );
+    ); */
   }
   render() {
     return (
