@@ -77,19 +77,19 @@ export default class SimpleInlineToolbarEditor extends Component {
     this.setState({
       editorState,
     });
-    var selectionState = editorState.getSelection();
+    /*var selectionState = editorState.getSelection();
     var anchorKey = selectionState.getAnchorKey();
     var currentContent = editorState.getCurrentContent();
     var currentContentBlock = currentContent.getBlockForKey(anchorKey);
     var start = selectionState.getStartOffset();
     var end = selectionState.getEndOffset();
     var selectedText = currentContentBlock.getText().slice(start, end);
-    console.log(selectedText);
+    //console.log(selectedText);
     this.state.selectedText = selectedText;
     this.setState({
       selectedText: selectedText
-    });
-    console.log(currentContentBlock.key);
+    });*/
+    //console.log(currentContentBlock.key);
   };
 
   focus = (e) => {
@@ -112,7 +112,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     this.setState({selectedText:e.target.value});
   }
   fetchSelectedText = (e) => {
-    var editorState = this.editor.getEditorState();
+/*    var editorState = this.editor.getEditorState();
     var selectionState = editorState.getSelection();
     var anchorKey = selectionState.getAnchorKey();
     var currentContent = editorState.getCurrentContent();
@@ -125,27 +125,34 @@ export default class SimpleInlineToolbarEditor extends Component {
     this.setState({
       selectedText: selectedText
     });
-    console.log(currentContentBlock);
+    console.log(currentContentBlock);*/
     //console.log(this.editor.editorState.getSelection());
   }
 
-  getInsertRange = (autocompleteState, editorState) => {
-    const currentSelectionState = editorState.getSelection();
-    const end = currentSelectionState.getAnchorOffset();
-    const anchorKey = currentSelectionState.getAnchorKey();
-    const currentContent = editorState.getCurrentContent();
-    const currentBlock = currentContent.getBlockForKey(anchorKey);
-    const blockText = currentBlock.getText();
-    const start = blockText.substring(0, end).lastIndexOf('#');
-
-    return {
-      start,
-      end,
-    };
-  };
   correctText = (e) => {
     console.log("Correct text function");
+
+    //const { start, end, text } = getFullWordWithCoordinates(editorState);
     var editorState = this.editor.getEditorState();
+    const start = 5; const end = 15; const text = "hello";
+    const contentState = editorState.getCurrentContent();
+    const selectionState = editorState.getSelection();
+    const contentStateWithEntity = contentState.createEntity(
+      'LINK',
+      'MUTABLE',
+      { status: 'complete' }
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    /*const newContentState = Modifier.replaceText(contentState,
+      selectionState.merge({ anchorOffset: start, focusOffset: end }),
+      `:HELLO:`,
+      null,
+      entityKey);*/
+    const newContentState = Modifier.replaceText(editorState.getCurrentContent(),selectionState,"Hello");
+    const newEditorState = EditorState.set(editorState, { currentContent: newContentState });
+    this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
+
+    /*var editorState = this.editor.getEditorState();
     let contentState = editorState.getCurrentContent();
     var selectionState = editorState.getSelection();
     console.log(selectionState);
@@ -153,7 +160,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     const newEditorState = EditorState.push(
       editorState,contentState,
     )
-    this.onChange(newEditorState);
+    this.onChange(newEditorState);*/
     /*let targetValue = e.target.value;
     var editorState = this.editor.getEditorState();
     var selectionState = editorState.getSelection();
