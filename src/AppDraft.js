@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Editor, { createEditorStateWithText } from 'draft-js-plugins-editor';
 import editorStyles from './editorStyles.css';
 import './editorStyles.css';
-import { Modifier,EditorState } from 'draft-js';
+import { Modifier,EditorState,CompositeDecorator } from 'draft-js';
 
 const styleMap = {
   'STRIKETROUGH':{
@@ -13,13 +13,55 @@ const styleMap = {
 
 const text = 'In this editor a toolbar shows up once you select part of the text …';
 
+function getEntityStrategy(type) {
+  return function(contentBlock, callback, contentState) {
+      contentBlock.findEntityRanges(
+          (character) => {
+              const entityKey = character.getEntity();
+              if (entityKey === null) {
+                  return false;
+              }
+              return contentState.getEntity(entityKey).getType() === type;
+          },
+          callback
+      );
+  };
+}
+function findLink(contentBlock, callback, contentState){
+  /*contentBlock.findEntityRanges(
+    (character) => {
+      const entityKey = character.getEntity();
+      return (
+        entityKey !== null &&
+        contentState.getEntity(entityKey).getType() === 'LINK'
+      );
+    },
+    callback
+  );*/
+}
+const LinkComponent = (props) => (<span style={{ background: 'red'}}>{props.children}</span>)
 export default class SimpleInlineToolbarEditor extends Component {
 
+  decorator = new CompositeDecorator([{
+    strategy: findLink,
+    component: LinkComponent
+  }]);
   state = {
     editorState: createEditorStateWithText(text),
     selectedText: "Hello Gorilla"
   };
-
+  /*state = {
+    editorState: EditorState.createEmpty(this.decorator)
+  }*/
+  /*constructor(props){
+    super(props);
+    const compositeDecorator = new CompositeDecorator([
+      { strategy: getEntityStrategy('LINK'), component: LinkComponent },
+    ]);
+    this.state = {
+      editorState: EditorState.createEmpty(compositeDecorator)
+    }
+  }*/
   onChange = (editorState) => {
 
     this.setState({
@@ -50,13 +92,23 @@ export default class SimpleInlineToolbarEditor extends Component {
     const text = this.state.selectedText;
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection();
-    /*const contentStateWithEntity = contentState.createEntity(
+    const contentStateWithEntity = contentState.createEntity(
       'LINK',
       'MUTABLE',
       { status: 'complete' }
-    );*/
-    //const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newContentState = Modifier.replaceText(editorState.getCurrentContent(),selectionState,text);
+    );
+    const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+    //const newContentState = Modifier.replaceText(editorState.getCurrentContent(),selectionState,text);
+    /*const newContentState = Modifier.replaceText(contentState,
+      selectionState.merge({ anchorOffset: start, focusOffset: end }),
+      `:${text}:`,
+      null,
+      entityKey);*/
+    const newContentState = Modifier.replaceText(contentState,
+      selectionState,
+      text,
+      null,
+      entityKey);
     const newEditorState = EditorState.set(editorState, { currentContent: newContentState });
     this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
