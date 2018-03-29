@@ -28,7 +28,7 @@ function getEntityStrategy(type) {
   };
 }
 function findLink(contentBlock, callback, contentState){
-  /*contentBlock.findEntityRanges(
+  contentBlock.findEntityRanges(
     (character) => {
       const entityKey = character.getEntity();
       return (
@@ -37,33 +37,34 @@ function findLink(contentBlock, callback, contentState){
       );
     },
     callback
-  );*/
+  );
 }
 const LinkComponent = (props) => (<span style={{ background: 'red'}}>{props.children}</span>)
 export default class SimpleInlineToolbarEditor extends Component {
 
-  decorator = new CompositeDecorator([{
+  /*decorator = new CompositeDecorator([{
     strategy: findLink,
     component: LinkComponent
   }]);
   state = {
     editorState: createEditorStateWithText(text),
     selectedText: "Hello Gorilla"
-  };
+  };*/
   /*state = {
     editorState: EditorState.createEmpty(this.decorator)
   }*/
-  /*constructor(props){
+  constructor(props){
     super(props);
     const compositeDecorator = new CompositeDecorator([
-      { strategy: getEntityStrategy('LINK'), component: LinkComponent },
+      { strategy: findLink, component: LinkComponent },
     ]);
     this.state = {
       editorState: EditorState.createEmpty(compositeDecorator)
     }
-  }*/
+  }
   onChange = (editorState) => {
-
+    this.setState({editorState});
+/*
     this.setState({
       editorState,
     });
@@ -78,7 +79,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     //this.state.selectedText = selectedText;
     this.setState({
       selectedText: selectedText
-    });
+    });*/
     //console.log(currentContentBlock.key);
   };
 
