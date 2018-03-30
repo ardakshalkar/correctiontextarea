@@ -67,10 +67,10 @@ export default class SimpleInlineToolbarEditor extends Component {
     this.focus = () => this.refs.editor.focus();
   }
   onChange = (editorState) => {
-    var event = new Date();
-  console.log(event.toTimeString());
-    console.log("ON CHANGE");
-    console.log(editorState.getCurrentContent().getPlainText());
+
+    /*this.setState({
+      editorState,
+    });*/
     var selectionState = editorState.getSelection();
     var anchorKey = selectionState.getAnchorKey();
     var currentContent = editorState.getCurrentContent();
@@ -79,11 +79,15 @@ export default class SimpleInlineToolbarEditor extends Component {
     var end = selectionState.getEndOffset();
     var selectedText = currentContentBlock.getText().slice(start, end);
     console.log(selectedText);
-    selectedText = "HIHI";
-    this.setState({
+    /*this.setState({
       editorState: EditorState.set(editorState, {
         decorator:decorators
       },),
+      selectedText: selectedText
+    });*/
+    console.log("state.selectedText (before): ON CHANGE");
+    console.log(this.state.selectedText);
+    this.setState({
       selectedText: selectedText
     });
     console.log("END ON CHANGE");
@@ -111,9 +115,12 @@ export default class SimpleInlineToolbarEditor extends Component {
   }
 
   correctText2 = (e) =>{
+    console.log("state.selectedText (before): ");
+    console.log(this.state.selectedText);
     this.setState({
       selectedText: "CORRECT TEXT"
     });
+    console.log("state.selectedText (after:",this.state.selectedText);
   }
   correctText = (e) => {
     console.log();
@@ -148,12 +155,22 @@ export default class SimpleInlineToolbarEditor extends Component {
       },),
       selectedText: ""
     });*/
-    this.setState({
+    /*this.setState({
       editorState: newEditorState,
       selectedText: "CHANGED"
+    });*/
+    let editor = EditorState.push(newEditorState,newContentState);
+    this.setState({
+      editorState: editor,
+      selectedText: "CHANGED"
     });
+    console.log("state.selectedText");
+    console.log(this.state.selectedText);
     console.log(this.state.editorState.getCurrentContent().getPlainText());
     console.log("END CORRECT TEXT");
+  }
+  fetch = () => {
+    console.log("FETCH CHANGE");
   }
   render() {
     return (
@@ -165,7 +182,7 @@ export default class SimpleInlineToolbarEditor extends Component {
             ref="editor"
             />
             <input type="text" onClick={this.focusTextArea} value={this.state.selectedText} onChange={this.handleTextCorrectionChange}/>
-            <button onClick={this.fetchSelectedText}>Fetch</button>
+            <button onClick={this.fetch}>Fetch</button>
             <button onClick={this.correctText2}>Correct</button>
         </div>
     );
