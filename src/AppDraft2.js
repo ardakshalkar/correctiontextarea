@@ -56,14 +56,8 @@ export default class SimpleInlineToolbarEditor extends Component {
     let contentState = ContentState.createFromText("How are thou?");
     this.state = {
       editorState: EditorState.createWithContent(contentState,decorators),
-      selectedText: ""
+      selectedText: "INITIAL"
     };
-    //EditorState.set(this.editorState,{decorator: decorators});
-/*
-    this.state = {
-      editorState: EditorState.createEmpty(decorators)
-    };*/
-
     this.focus = () => this.refs.editor.focus();
   }
   onChange = (editorState) => {
@@ -88,7 +82,8 @@ export default class SimpleInlineToolbarEditor extends Component {
     console.log("state.selectedText (before): ON CHANGE");
     console.log(this.state.selectedText);
     this.setState({
-      selectedText: selectedText
+      selectedText: selectedText,
+      editorState:editorState,
     });
     console.log("END ON CHANGE");
 /*
