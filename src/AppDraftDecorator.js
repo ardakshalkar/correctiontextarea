@@ -1,78 +1,27 @@
 import React, { Component } from 'react';
 import Editor, { createEditorStateWithText } from 'draft-js-plugins-editor';
-import createInlineToolbarPlugin from 'draft-js-inline-toolbar-plugin';
 import editorStyles from './editorStyles.css';
 import './editorStyles.css';
-import { Modifier,EditorState,CompositeDecorator, ContentState } from 'draft-js';
+import { Modifier,EditorState,CompositeDecorator,ContentState } from 'draft-js';
 import MultiDecorator from 'draft-js-plugins-editor/lib/Editor/MultiDecorator';
-
 
 const createDecorator = (decor) =>{
   const decorators  = decor;
-  return new MultiDecorator([new CompositeDecorator([
-    {
-      strategy: handleStrategy,
-      component: HandleSpan,
+  console.log(decor);
+  return new MultiDecorator([new CompositeDecorator(decorators)]);
+}
+function findLink(contentBlock, callback, contentState){
+  contentBlock.findEntityRanges(
+    (character) => {
+      const entityKey = character.getEntity();
+      return (
+        entityKey !== null &&
+        contentState.getEntity(entityKey).getType() === 'LINK'
+      );
     },
-    {
-      strategy: hashtagStrategy,
-      component: HashtagSpan,
-    },
-  ])]);
+    callback
+  );
 }
-
-const text = 'In this editor a toolbar shows up once you select part of the text …';
-
-
-export default class SimpleInlineToolbarEditor extends Component {
-
-  constructor(props){
-    super(props);
-
-    const compositeDecorator = new CompositeDecorator([
-      {
-        strategy: handleStrategy,
-        component: HandleSpan,
-      },
-      {
-        strategy: hashtagStrategy,
-        component: HashtagSpan,
-      },
-    ]);
-    let contentState = ContentState.createFromText("How are thou?");
-    /*this.state = {
-      editorState: EditorState.createEmpty(decorators),
-      selectedText: ""
-    };*/
-    this.state = {
-      editorState: EditorState.createEmpty(createDecorator()),
-      selectedText: ""
-    };
-    this.onChange = (editorState) => this.setState({editorState});
-  }
-  render() {
-    return (
-        <div className="editor" onClick={this.focus}>
-          <Editor
-            editorState={this.state.editorState}
-            onChange={this.onChange}
-            ref={(element) => { this.editor = element; }}
-          />
-        </div>
-    );
-  }
-}
-const HANDLE_REGEX = /\@[\w]+/g;
-const HASHTAG_REGEX = /\#[\w\u0590-\u05ff]+/g;
-
-function handleStrategy(contentBlock, callback, contentState) {
-  findWithRegex(HANDLE_REGEX, contentBlock, callback);
-}
-
-function hashtagStrategy(contentBlock, callback, contentState) {
-  findWithRegex(HASHTAG_REGEX, contentBlock, callback);
-}
-
 function findWithRegex(regex, contentBlock, callback) {
   const text = contentBlock.getText();
   let matchArr, start;
@@ -81,52 +30,79 @@ function findWithRegex(regex, contentBlock, callback) {
     callback(start, start + matchArr[0].length);
   }
 }
+function findHello(contentBlock,callback,contentState){
+  findWithRegex(/#[\w]+/g, contentBlock, callback);
+}
 
-const HandleSpan = (props) => {
-  return (
-    <span
-      style={styles.handle}
-      data-offset-key={props.offsetKey}
-      >
-      {props.children}
-    </span>
-  );
-};
+const text = "this is some text with data";
+const LinkEntity = (props) => (<span style={{ background: 'red'}}>{props.children}</span>)
+const HelloEntity = (props) => (<strong>{props.children}</strong>)
 
-const HashtagSpan = (props) => {
-  return (
-    <span
-      style={styles.hashtag}
-      data-offset-key={props.offsetKey}
-      >
-      {props.children}
-    </span>
-  );
-};
+const decorators = createDecorator([
+  {
+    strategy: findLink,
+    component: LinkEntity,
+  },
+  {
+    strategy: findHello,
+    component: HelloEntity,
+  }
+]);
+export default class SimpleInlineToolbarEditor extends Component {
+  
+  constructor(props){
+    super(props);
 
-const styles = {
-  root: {
-    fontFamily: '\'Helvetica\', sans-serif',
-    padding: 20,
-    width: 600,
-  },
-  editor: {
-    border: '1px solid #ddd',
-    cursor: 'text',
-    fontSize: 16,
-    minHeight: 40,
-    padding: 10,
-  },
-  button: {
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  handle: {
-    color: 'rgba(98, 177, 254, 1.0)',
-    direction: 'ltr',
-    unicodeBidi: 'bidi-override',
-  },
-  hashtag: {
-    color: 'rgba(95, 184, 138, 1.0)',
-  },
-};
+    let contentState = ContentState.createFromText("How are thou?");
+    this.state = {
+      editorState: EditorState.createWithContent(contentState,decorators),
+      selectedText: ""
+    };
+    //EditorState.set(this.editorState,{decorator: decorators});
+/*
+    this.state = {
+      editorState: EditorState.createEmpty(decorators)
+    };*/
+
+    this.focus = () => this.refs.editor.focus();
+  }
+  onChange = (editorState) => {
+    var event = new Date();
+    var selectionState = editorState.getSelection();
+    var anchorKey = selectionState.getAnchorKey();
+    var currentContent = editorState.getCurrentContent();
+    var currentContentBlock = currentContent.getBlockForKey(anchorKey);
+    var start = selectionState.getStartOffset();
+    var end = selectionState.getEndOffset();
+    var selectedText = currentContentBlock.getText().slice(start, end);
+    selectedText = "HIHI";
+    this.setState({
+      editorState: EditorState.set(editorState, {
+        decorator:decorators
+      },),
+      selectedText: selectedText
+    });
+  };
+
+  handleTextCorrectionChange = (e) => {
+    this.setState({selectedText:e.target.value});
+  }
+  correctText2 = (e) =>{
+
+  }
+  render() {
+    return (
+        <div className="editor" onClick={this.focus}>
+          <Editor
+            editorState={this.state.editorState}
+            onChange={this.onChange}
+            placeholder="Enter some text..."
+            ref="editor"
+            />
+            <input type="text" onClick={this.focusTextArea} value={this.state.selectedText} onChange={this.handleTextCorrectionChange}/>
+            <button onClick={this.fetchSelectedText}>Fetch</button>
+            <button onClick={this.correctText2}>Correct</button>
+        </div>
+    );
+  }
+}

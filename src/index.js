@@ -8,6 +8,6 @@ import AppDraftDecorator from './AppDraftDecorator';
 import './index.css';
 
 ReactDOM.render(
-  <AppDraftDecorator/>,
+  <AppDraft2/>,
   document.getElementById('root')
 );

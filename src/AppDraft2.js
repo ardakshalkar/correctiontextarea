@@ -1,15 +1,23 @@
 import React, { Component } from 'react';
 import Editor, { createEditorStateWithText } from 'draft-js-plugins-editor';
+import createInlineToolbarPlugin from 'draft-js-inline-toolbar-plugin';
 import editorStyles from './editorStyles.css';
 import './editorStyles.css';
-import { Modifier,EditorState,CompositeDecorator,ContentState } from 'draft-js';
+import { Modifier,EditorState,CompositeDecorator, ContentState } from 'draft-js';
 import MultiDecorator from 'draft-js-plugins-editor/lib/Editor/MultiDecorator';
+const styleMap = {
+  'STRIKETROUGH':{
+    textDecoration:'line-through',
+  }
+}
 
 const createDecorator = (decor) =>{
   const decorators  = decor;
-  console.log(decor);
   return new MultiDecorator([new CompositeDecorator(decorators)]);
 }
+
+const text = 'In this editor a toolbar shows up once you select part of the text …';
+
 function findLink(contentBlock, callback, contentState){
   contentBlock.findEntityRanges(
     (character) => {
@@ -34,10 +42,6 @@ function findHello(contentBlock,callback,contentState){
   findWithRegex(/#[\w]+/g, contentBlock, callback);
 }
 
-const text = "this is some text with data";
-const LinkEntity = (props) => (<span style={{ background: 'red'}}>{props.children}</span>)
-const HelloEntity = (props) => (<strong>{props.children}</strong>)
-
 const decorators = createDecorator([
   {
     strategy: findLink,
@@ -48,47 +52,19 @@ const decorators = createDecorator([
     component: HelloEntity,
   }
 ]);
+const HelloEntity = (props) => (<strong>{props.children}</strong>)
+const LinkEntity = (props) => (<span style={{ background: 'red'}}>{props.children}</span>)
 export default class SimpleInlineToolbarEditor extends Component {
-  
   constructor(props){
     super(props);
-
     let contentState = ContentState.createFromText("How are thou?");
     this.state = {
       editorState: EditorState.createWithContent(contentState,decorators),
       selectedText: ""
     };
-    this.focus = () => this.refs.editor.focus();
+    //this.focus = () => this.refs.editor.focus();
   }
   onChange = (editorState) => {
-
-    this.setState({
-      editorState,
-    });
-    var selectionState = editorState.getSelection();
-    var anchorKey = selectionState.getAnchorKey();
-    var currentContent = editorState.getCurrentContent();
-    var currentContentBlock = currentContent.getBlockForKey(anchorKey);
-    var start = selectionState.getStartOffset();
-    var end = selectionState.getEndOffset();
-    var selectedText = currentContentBlock.getText().slice(start, end);
-    console.log("=============");
-    console.log(start," ",end);
-    console.log(selectedText);
-    /*this.setState({
-      editorState: EditorState.set(editorState, {
-        decorator:decorators
-      },),
-      selectedText: selectedText
-    });*/
-    console.log("state.selectedText (before): ON CHANGE");
-    console.log(selectedText);
-    console.log(this.state.selectedText);
-    this.setState((prevState,props)=>{
-      selectedText: selectedText;
-    });
-    console.log("END ON CHANGE");
-/*
     this.setState({
       editorState,
     });
@@ -100,10 +76,13 @@ export default class SimpleInlineToolbarEditor extends Component {
     var end = selectionState.getEndOffset();
     var selectedText = currentContentBlock.getText().slice(start, end);
     //console.log(selectedText);
-    //this.state.selectedText = selectedText;
+    this.state.selectedText = selectedText;
     this.setState({
       selectedText: selectedText
-    });*/
+    });
+    console.log(currentContent);
+    console.log(currentContent.getBlockMap().toJSON());
+    console.log(currentContent.getEntityMap());
     //console.log(currentContentBlock.key);
   };
 
@@ -112,7 +91,8 @@ export default class SimpleInlineToolbarEditor extends Component {
   }
 
   correctText = (e) => {
-    var editorState = this.state.editorState;
+    console.log("Correct text function");
+    var editorState = this.editor.getEditorState();
     const text = this.state.selectedText;
     const contentState = editorState.getCurrentContent();
     const selectionState = editorState.getSelection();
@@ -122,33 +102,22 @@ export default class SimpleInlineToolbarEditor extends Component {
       { status: 'complete' }
     );
     const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
-    const newContentState = Modifier.replaceText(contentState,
-      selectionState,
-      text,
-      null,
-      entityKey);
+    const newContentState = Modifier.replaceText(editorState.getCurrentContent(),selectionState,text);
     const newEditorState = EditorState.set(editorState, { currentContent: newContentState });
-    let editor = EditorState.push(newEditorState,newContentState);
-    this.setState((prevState,props)=>{
-      editorState: editor;
-      selectedText: "CHANGED";
-    });
-  }
-  fetch = () => {
-    console.log("FETCH CHANGE");
+    this.setState({ editorState: EditorState.moveFocusToEnd(newEditorState) });
   }
   render() {
     return (
         <div className="editor" onClick={this.focus}>
           <Editor
+            customStyleMap={styleMap}
             editorState={this.state.editorState}
             onChange={this.onChange}
-            placeholder="Enter some text..."
-            ref="editor"
-            />
-            <input type="text" onClick={this.focusTextArea} value={this.state.selectedText} onChange={this.handleTextCorrectionChange}/>
-            <button onClick={this.fetch}>Fetch</button>
-            <button onClick={this.correctText}>Correct</button>
+            ref={(element) => { this.editor = element; }}
+          />
+          <input type="text" onClick={this.focusTextArea} value={this.state.selectedText} onChange={this.handleTextCorrectionChange}/>
+          <button onClick={this.fetchSelectedText}>Fetch</button>
+          <button onClick={this.correctText}>Correct</button>
         </div>
     );
   }

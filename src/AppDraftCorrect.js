@@ -68,7 +68,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     this.setState({
       editorState,
     });
-    /*var selectionState = editorState.getSelection();
+    var selectionState = editorState.getSelection();
     var anchorKey = selectionState.getAnchorKey();
     var currentContent = editorState.getCurrentContent();
     var currentContentBlock = currentContent.getBlockForKey(anchorKey);
@@ -82,7 +82,7 @@ export default class SimpleInlineToolbarEditor extends Component {
     });
     console.log(currentContent);
     console.log(currentContent.getBlockMap().toJSON());
-    console.log(currentContent.getEntityMap());*/
+    console.log(currentContent.getEntityMap());
     //console.log(currentContentBlock.key);
   };
 
