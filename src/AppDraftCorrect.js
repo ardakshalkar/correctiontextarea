@@ -72,8 +72,6 @@ export default class SimpleInlineToolbarEditor extends Component {
     var start = selectionState.getStartOffset();
     var end = selectionState.getEndOffset();
     var selectedText = currentContentBlock.getText().slice(start, end);
-    console.log("=============");
-    console.log(start," ",end);
     console.log(selectedText);
     /*this.setState({
       editorState: EditorState.set(editorState, {
@@ -81,12 +79,18 @@ export default class SimpleInlineToolbarEditor extends Component {
       },),
       selectedText: selectedText
     });*/
-    console.log("state.selectedText (before): ON CHANGE");
-    console.log(selectedText);
-    console.log(this.state.selectedText);
+
+
+    this.setState({
+      selectedText:selectedText
+    });
+    
+    /*console.log(this.state.selectedText);
     this.setState((prevState,props)=>{
       selectedText: selectedText;
+      console.log(this.state.selectedText);
     });
+    console.log(this.state.selectedText);*/
     console.log("END ON CHANGE");
 /*
     this.setState({
@@ -112,6 +116,7 @@ export default class SimpleInlineToolbarEditor extends Component {
   }
 
   correctText = (e) => {
+    console.log("CORRECT TEXT");
     var editorState = this.state.editorState;
     const text = this.state.selectedText;
     const contentState = editorState.getCurrentContent();
@@ -129,9 +134,13 @@ export default class SimpleInlineToolbarEditor extends Component {
       entityKey);
     const newEditorState = EditorState.set(editorState, { currentContent: newContentState });
     let editor = EditorState.push(newEditorState,newContentState);
-    this.setState((prevState,props)=>{
+    /*this.setState((prevState,props)=>{
       editorState: editor;
       selectedText: "CHANGED";
+    });*/
+    this.setState({
+      editorState:editor,
+      selectedText:"CHANGED"
     });
   }
   fetch = () => {
