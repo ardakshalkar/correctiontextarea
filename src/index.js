@@ -4,9 +4,10 @@ import App from './App';
 import AppDraft from './AppDraft';
 import AppDraft2 from './AppDraft2';
 import AppDraftCorrect from './AppDraftCorrect';
+import AppDraftDecorator from './AppDraftDecorator';
 import './index.css';
 
 ReactDOM.render(
-  <AppDraftCorrect/>,
+  <AppDraftDecorator/>,
   document.getElementById('root')
 );
